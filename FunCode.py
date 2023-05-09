@@ -6,6 +6,8 @@ import argparse
 import cv2
 import imutils
 import time
+from tkinter import Tk     # from tkinter import Tk for Python 3.x
+from tkinter.filedialog import askopenfilename
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video",
@@ -38,12 +40,16 @@ brownUpper = (30, 255, 80)
 pts = deque(maxlen=args["buffer"])
 # if a video path was not supplied, grab the reference
 # to the webcam
-if not args.get("video", False):
-	vs = VideoStream(src=0).start()
+if not args.get("video", False): #When we don't pull a video from commandline, use GUI mode
+    #Nyomi Found this solution from https://stackoverflow.com/questions/54307228/how-to-show-videos-frame-by-frame-with-key-presses-with-python-and-opencv
+    Tk().withdraw()
+    filename = askopenfilename()
+    vs = cv2.VideoCapture(filename)
 # otherwise, grab a reference to the video file
 else:
-	vs = cv2.VideoCapture(args["video"])
+    vs = cv2.VideoCapture(args["video"])
 # allow the camera or video file to warm up
+
 time.sleep(2.0)
 
 # keep looping
@@ -51,7 +57,7 @@ while True:
 	# grab the current frame
 	frame = vs.read()
 	# handle the frame from VideoCapture or VideoStream
-	frame = frame[1] if args.get("video", False) else frame
+	frame = frame[1] #if args.get("video", False) else frame
 	# if we are viewing a video and we did not grab a frame,
 	# then we have reached the end of the video
 	if frame is None:
