@@ -18,7 +18,7 @@ ap.add_argument("-v", "--video",
 ap.add_argument("-b", "--buffer", type=int, default=64,
                 help="max buffer size")
 args = vars(ap.parse_args())
-
+#"C:\Program Files\Python39\python.exe" C:/Users/leeba/PycharmProjects/SoccerSimulator/FunCode.py
 # Initialize Position: Define camera calibration
 print('\n\nWhich camera calibration should be used?\n')
 print('Type "1" for new GoPro\n')
@@ -71,17 +71,22 @@ pts = deque(maxlen=args["buffer"])
 # Setup: when we don't pull a video from commandline, open file explorer to find video
 # Nyomi Found this solution from https://stackoverflow.com/questions/54307228/how-to-show-videos-frame-by-frame
 # -with-key-presses-with-python-and-opencv
+
 if not args.get("video", False):
     Tk().withdraw()
     filename = askopenfilename()
     vs = cv2.VideoCapture(filename)
 else:
+
     vs = cv2.VideoCapture(args["video"])
 
 # Pause to let video player boot up
 time.sleep(2.0)
 
 # Main Program Loop:
+radius = 1
+center = [0, 0]
+frames_hidden = 0
 while True:
     # Grab current frame:
     frame = vs.read()
@@ -114,6 +119,7 @@ while True:
     cnts = imutils.grab_contours(cnts)
     center = None
 
+    radius = 1
     if len(cnts) > 0:
         # Assume largest contour is edge of ball, use to compute center and size
         c = max(cnts, key=cv2.contourArea)
@@ -130,11 +136,31 @@ while True:
 
     # Compute Position:
     # (average the depth based on x and y focal lengths for increased accuracy)
-    z_pos.append(0.5 * (((ball_diameter * fx * x_scale) / (2 * radius)) + ((ball_diameter * fy * y_scale) / (2 * radius))))
-    x_pos.append((z_pos[len(z_pos)-1] * (center[0] - (width / 2))) / (fx * x_scale))
-    y_pos.append((z_pos[len(z_pos)-1] * (center[1] - (height / 2))) / (fy * y_scale))
-    print(center, ' ', radius)
-    print(x_pos[len(x_pos)-1], ' ', y_pos[len(y_pos)-1], ' ', z_pos[len(z_pos)-1], '\n')
+    if len(z_pos) > 1 or radius > 2:
+        if radius < 2:
+            frames_hidden = frames_hidden + 1
+        else:
+            if frames_hidden > 0:
+                old_z = z_pos[len(z_pos)-1]
+                old_x = x_pos[len(x_pos) - 1]
+                old_y = y_pos[len(y_pos) - 1]
+                new_z = 0.5 * (((ball_diameter * fx * x_scale) / (2 * radius)) + ((ball_diameter * fy * y_scale) / (2 * radius)))
+                new_x = (new_z * (center[0] - (width / 2))) / (fx * x_scale)
+                new_y = (new_z * (center[1] - (height / 2))) / (fy * y_scale)
+                dz = (new_z - old_z) / (frames_hidden + 1)
+                dx = (new_x - old_x) / (frames_hidden + 1)
+                dy = (new_y - old_y) / (frames_hidden + 1)
+                for i in range(frames_hidden):
+                    z_pos.append(z_pos[len(z_pos)-1] + dz)
+                    x_pos.append(x_pos[len(x_pos) - 1] + dx)
+                    y_pos.append(y_pos[len(y_pos) - 1] + dy)
+            else:
+                z_pos.append(0.5 * (((ball_diameter * fx * x_scale) / (2 * radius)) + ((ball_diameter * fy * y_scale) / (2 * radius))))
+                x_pos.append((z_pos[len(z_pos)-1] * (center[0] - (width / 2))) / (fx * x_scale))
+                y_pos.append((z_pos[len(z_pos)-1] * (center[1] - (height / 2))) / (fy * y_scale))
+
+            print(x_pos[len(x_pos)-1], ' ',y_pos[len(y_pos)-1], ' ',z_pos[len(z_pos)-1], ' ')
+
 
     # Draw dot at center: draws center and trail of previous center locations
     for i in range(1, len(pts)):
