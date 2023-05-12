@@ -7,6 +7,11 @@ import imutils
 import time
 from tkinter import Tk  # from tkinter import Tk for Python 3.x
 from tkinter.filedialog import askopenfilename
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import animation
+from mpl_toolkits import mplot3d
+from tkinter import *
 
 # Ball tracking code based off program by Adrian Rosebrock from
 # https://pyimagesearch.com/2015/09/14/ball-tracking-with-opencv/ (found by Andrew)
@@ -73,8 +78,13 @@ pts = deque(maxlen=args["buffer"])
 # -with-key-presses-with-python-and-opencv
 
 if not args.get("video", False):
-    Tk().withdraw()
-    filename = askopenfilename()
+    root = Tk()
+    root.withdraw()
+    root.focus_force()
+    root.wm_attributes('-topmost', 1)
+    
+    filename = askopenfilename(parent=root)
+    # filename = "C:\\Users\\kosikoaj\\Documents\\Rose\\Junior\\JuniorSpring\\CSSE461\\GoProVideos\\GX010024.MP4"
     vs = cv2.VideoCapture(filename)
 else:
 
@@ -184,3 +194,49 @@ vs.release()
 
 # Close program:
 cv2.destroyAllWindows()
+
+fig = plt.figure()
+ax = plt.axes(projection='3d')
+
+# Data for a three-dimensional line
+zline = z_pos
+xline = x_pos
+yline = y_pos
+# ax.plot3D(xline, yline, zline, 'gray')
+# plt.show()
+# while True:
+#     True
+
+
+# def gen(n):
+#     phi = 0
+#     while phi < 2*np.pi:
+#         yield np.array([np.cos(phi), np.sin(phi), phi])
+#         phi += 2*np.pi/n
+
+# def update(num, data, line):
+def update(num, x_pos,y_pos,z_pos, line):
+    # line.set_data(data[:2, :num])
+    line.set_data(x_pos[:num], y_pos[:num])
+    line.set_3d_properties(z_pos[:num])
+    # line.set_3d_properties(data[2, :num])
+
+# N = 100
+# N = len(x_pos)
+N = len(x_pos)
+# data = np.array(list(gen(N))).T
+# line, = ax.plot(data[0, 0:1], data[1, 0:1], data[2, 0:1])
+line, = ax.plot(x_pos[0:1], y_pos[0:1], z_pos[0:1])
+
+# Setting the axes properties
+ax.set_xlim3d([min(x_pos), max(x_pos)])
+ax.set_xlabel('X')
+
+ax.set_ylim3d([min(y_pos), max(y_pos)])
+ax.set_ylabel('Y')
+
+ax.set_zlim3d([min(z_pos), max(z_pos)])
+ax.set_zlabel('Z')
+
+anim = animation.FuncAnimation(fig, update, N, fargs=(x_pos,y_pos,z_pos, line), interval=20, blit=False)
+plt.show()
