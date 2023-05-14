@@ -5,7 +5,7 @@ import numpy as np
 
 cd = ColorDetector()
 # Create a VideoCapture object and read from input file
-cap = cv2.VideoCapture('OldPro Take 8.mp4')
+cap = cv2.VideoCapture('OldProTake1.mp4')
 
 # Check if camera opened successfully
 if (cap.isOpened() == False):
