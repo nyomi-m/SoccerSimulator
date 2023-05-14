@@ -107,25 +107,25 @@ while True:
     x_scale = width/dimensions[1]
     y_scale = height/dimensions[0]
 
-    # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-    # hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+    blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+    hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
-    # mask = cv2.inRange(hsv, greenLower, greenUpper)
-    # mask2 = cv2.inRange(hsv, yellowBrownLower, yellowBrownUpper)
-    # mask3 = cv2.inRange(hsv, brownLower, brownUpper)
-    # mask = mask | mask2 | mask3
+    mask = cv2.inRange(hsv, greenLower, greenUpper)
+    mask2 = cv2.inRange(hsv, yellowBrownLower, yellowBrownUpper)
+    mask3 = cv2.inRange(hsv, brownLower, brownUpper)
+    mask = mask | mask2 | mask3
 
-    # blurred = cv2.bitwise_and(blurred,blurred,mask = mask)
+    blurred = cv2.bitwise_and(blurred,blurred,mask = mask)
 
-    # hsvToRGB = cv2.cvtColor(blurred,cv2.COLOR_HSV2BGR)
-    # rgbToGrayscale = cv2.cvtColor(blurred,cv2.COLOR_BGR2GRAY)
+    hsvToRGB = cv2.cvtColor(blurred,cv2.COLOR_HSV2BGR)
+    rgbToGrayscale = cv2.cvtColor(blurred,cv2.COLOR_BGR2GRAY)
 
-    # gray = rgbToGrayscale
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = rgbToGrayscale
+    # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
   
     # Blur using 3 * 3 kernel.  
-    # gray_blurred = cv2.blur(gray, (2, 2))
-    gray_blurred = cv2.bilateralFilter(gray,4,50,20)
+    gray_blurred = cv2.blur(gray, (3, 3))
+    # gray_blurred = cv2.bilateralFilter(gray,4,50,20)
     # gray_blurred = cv2.medianBlur(gray,5)
     
 
@@ -133,17 +133,14 @@ while True:
     # pts = cv2.HoughCircles(gray_blurred, 
     #                 cv2.HOUGH_GRADIENT_ALT, 1.5, 200, param1 = 400,
     #             param2 = 0.89, minRadius = 2, maxRadius = 30)
-    pts = cv2.HoughCircles(gray_blurred, 
-                    cv2.HOUGH_GRADIENT_ALT, 1.5, 200, param1 = 100,
-                param2 = 0.5, minRadius = 0, maxRadius = 30)
     
     #Meh for mask
     # pts = cv2.HoughCircles(gray_blurred, 
     #                 cv2.HOUGH_GRADIENT_ALT, 1.5, 200, param1 = 400,
     #             param2 = 0.5, minRadius = 6, maxRadius = 15)
-    # pts = cv2.HoughCircles(gray_blurred, 
-    #                 cv2.HOUGH_GRADIENT, 1, 200, param1 = 150,
-    #             param2 = 13, minRadius = 4, maxRadius = 14)
+    pts = cv2.HoughCircles(gray_blurred, 
+                    cv2.HOUGH_GRADIENT, 1, 200, param1 = 150,
+                param2 = 13, minRadius = 4, maxRadius = 14)
 
     
     # Draw circles that are detected.
