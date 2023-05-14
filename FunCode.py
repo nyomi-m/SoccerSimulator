@@ -13,6 +13,10 @@ from matplotlib import animation
 from mpl_toolkits import mplot3d
 from tkinter import *
 
+import matplotlib
+
+matplotlib.use('TkAgg')
+
 # Ball tracking code based off program by Adrian Rosebrock from
 # https://pyimagesearch.com/2015/09/14/ball-tracking-with-opencv/ (found by Andrew)
 
@@ -98,6 +102,8 @@ radius = 1
 center = [0, 0]
 frames_hidden = 0
 while True:
+    clock1 = time.perf_counter() * 30
+
     # Grab current frame:
     frame = vs.read()
     frame = frame[1]
@@ -160,16 +166,18 @@ while True:
                 dz = (new_z - old_z) / (frames_hidden + 1)
                 dx = (new_x - old_x) / (frames_hidden + 1)
                 dy = (new_y - old_y) / (frames_hidden + 1)
-                for i in range(frames_hidden):
-                    z_pos.append(z_pos[len(z_pos)-1] + dz)
+                for i in range(frames_hidden + 1):
+                    z_pos.append(z_pos[len(z_pos) - 1] + dz)
                     x_pos.append(x_pos[len(x_pos) - 1] + dx)
                     y_pos.append(y_pos[len(y_pos) - 1] + dy)
+                frames_hidden = 0
             else:
                 z_pos.append(0.5 * (((ball_diameter * fx * x_scale) / (2 * radius)) + ((ball_diameter * fy * y_scale) / (2 * radius))))
                 x_pos.append((z_pos[len(z_pos)-1] * (center[0] - (width / 2))) / (fx * x_scale))
                 y_pos.append((z_pos[len(z_pos)-1] * (center[1] - (height / 2))) / (fy * y_scale))
 
             print(x_pos[len(x_pos)-1], ' ',y_pos[len(y_pos)-1], ' ',z_pos[len(z_pos)-1], ' ')
+
 
 
     # Draw dot at center: draws center and trail of previous center locations
@@ -179,6 +187,11 @@ while True:
         # Tapers line between previous centers
         thickness = int(np.sqrt(args["buffer"] / float(i + 1)) * 2.5)
         cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
+
+    clock2 = time.perf_counter() * 30
+    sleep = int(clock1) + 1 - clock2
+    if sleep > 0:
+        time.sleep(sleep / 30)
 
     # Display video frame:
     cv2.imshow("Frame", frame)
@@ -227,16 +240,23 @@ N = len(x_pos)
 # data = np.array(list(gen(N))).T
 # line, = ax.plot(data[0, 0:1], data[1, 0:1], data[2, 0:1])
 line, = ax.plot(x_pos[0:1], y_pos[0:1], z_pos[0:1])
+ax.view_init(-90,-90)
+
+globalMin = min(min(x_pos),min(y_pos),min(z_pos))
+globalMax = max(max(x_pos),max(y_pos),max(z_pos))
 
 # Setting the axes properties
-ax.set_xlim3d([min(x_pos), max(x_pos)])
+ax.set_xlim3d([globalMin, globalMax])
+# ax.set_xlim3d([min(x_pos), max(x_pos)])
 ax.set_xlabel('X')
 
-ax.set_ylim3d([min(y_pos), max(y_pos)])
+ax.set_ylim3d([globalMin, globalMax])
+# ax.set_ylim3d([min(y_pos), max(y_pos)])
 ax.set_ylabel('Y')
 
-ax.set_zlim3d([min(z_pos), max(z_pos)])
+ax.set_zlim3d([globalMin, globalMax])
+# ax.set_zlim3d([min(z_pos), max(z_pos)])
 ax.set_zlabel('Z')
 
-anim = animation.FuncAnimation(fig, update, N, fargs=(x_pos,y_pos,z_pos, line), interval=20, blit=False)
+anim = animation.FuncAnimation(fig, update, N, fargs=(x_pos,y_pos,z_pos, line), interval=(int) (1000/30), blit=False)
 plt.show()
