@@ -211,8 +211,8 @@ while True:
         cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
 
     # Display video frame:
-    # cv2.imshow("Frame", frame)
-    cv2.imshow("Frame",gray_blurred)
+    cv2.imshow("Frame", frame)
+    # cv2.imshow("Frame",gray_blurred)
     key = cv2.waitKey(1) & 0xFF
 
     # Stop key:

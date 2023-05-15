@@ -13,6 +13,10 @@ from matplotlib import animation
 from mpl_toolkits import mplot3d
 from tkinter import *
 
+import matplotlib
+
+matplotlib.use('TkAgg')
+
 # Ball tracking code based off program by Adrian Rosebrock from
 # https://pyimagesearch.com/2015/09/14/ball-tracking-with-opencv/ (found by Andrew)
 
@@ -140,7 +144,7 @@ while True:
     #             param2 = 0.5, minRadius = 6, maxRadius = 15)
     pts = cv2.HoughCircles(gray_blurred, 
                     cv2.HOUGH_GRADIENT, 1, 200, param1 = 150,
-                param2 = 13, minRadius = 4, maxRadius = 14)
+                param2 = 13, minRadius = 8, maxRadius = 14)
 
     
     # Draw circles that are detected.
@@ -208,8 +212,8 @@ while True:
         cv2.line(frame, pts[i - 1], pts[i], (0, 0, 255), thickness)
 
     # Display video frame:
-    # cv2.imshow("Frame", frame)
-    cv2.imshow("Frame",gray_blurred)
+    cv2.imshow("Frame", frame)
+    # cv2.imshow("Frame",gray_blurred)
     key = cv2.waitKey(1) & 0xFF
 
     # Stop key:
